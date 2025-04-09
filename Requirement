@@ -1,0 +1,531 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const Requirement = ({ formData, setFormData }) => {
+  const [activeSection, setActiveSection] = useState('websiteType');
+  const [priceEstimate, setPriceEstimate] = useState(0);
+
+  // Calculate price estimate based on selections
+  useEffect(() => {
+    let basePrice = 0;
+    
+    // Website type pricing
+    if (formData.websiteTypes.includes('ecommerce')) basePrice += 5000;
+    else if (formData.websiteTypes.includes('corporate')) basePrice += 3000;
+    else if (formData.websiteTypes.includes('dynamic')) basePrice += 2000;
+    else basePrice += 1000; // static
+    
+    // Add-ons
+    if (formData.numberOfPages > 5) basePrice += (formData.numberOfPages - 5) * 100;
+    if (formData.wantDomain) basePrice += 150;
+    if (formData.responsive) basePrice += 500;
+    if (formData.specialRequirements.length) basePrice += formData.specialRequirements.length * 200;
+    if (formData.technologies.includes('Shopify')) basePrice += 1000;
+    if (formData.technologies.includes('WordPress')) basePrice += 800;
+    
+    setPriceEstimate(basePrice);
+  }, [formData]);
+
+  const checkboxOptions = [
+    { name: 'Static Website', value: 'static', icon: '🖥️' },
+    { name: 'Dynamic Website', value: 'dynamic', icon: '⚡' },
+    { name: 'Corporate Website', value: 'corporate', icon: '🏢' },
+    { name: 'One Page Site', value: 'one-page', icon: '📄' },
+    { name: 'E-Commerce', value: 'ecommerce', icon: '🛒' },
+  ];
+
+  const specialRequirementsOptions = [
+    { name: 'SEO Friendly', value: 'SEO Friendly', icon: '🔍' },
+    { name: 'On Page SEO', value: 'On Page SEO', icon: '📊' },
+    { name: 'Social Media Linking', value: 'Social Media Linking', icon: '📱' },
+    { name: 'Analytics Integration', value: 'Analytics Integration', icon: '📈' },
+    { name: 'Contact Form', value: 'Contact Form', icon: '✉️' },
+  ];
+
+  const technologyOptions = [
+    { name: 'React', value: 'React', icon: '⚛️' },
+    { name: 'WordPress', value: 'WordPress', icon: '📝' },
+    { name: 'Shopify', value: 'Shopify', icon: '🛍️' },
+    { name: 'Custom HTML/CSS/JS', value: 'Custom HTML/CSS/JS', icon: '🖋️' },
+    { name: 'Node.js', value: 'Node.js', icon: '🚀' },
+    { name: 'Vue.js', value: 'Vue.js', icon: '🟢' },
+    { name: 'Angular', value: 'Angular', icon: '🅰️' },
+    { name: 'Laravel', value: 'Laravel', icon: '🐘' },
+  ];
+
+  const pageSuggestions = [
+    { name: 'Home', value: 'Home', icon: '🏠' },
+    { name: 'About Us', value: 'About Us', icon: '👥' },
+    { name: 'Services', value: 'Services', icon: '🛠️' },
+    { name: 'Contact', value: 'Contact', icon: '📞' },
+    { name: 'Blog', value: 'Blog', icon: '📝' },
+    { name: 'Portfolio', value: 'Portfolio', icon: '🎨' },
+    { name: 'Shop', value: 'Shop', icon: '🛒' },
+    { name: 'FAQ', value: 'FAQ', icon: '❓' },
+    { name: 'Testimonials', value: 'Testimonials', icon: '🌟' },
+    { name: 'Pricing', value: 'Pricing', icon: '💰' },
+  ];
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    if (type === 'checkbox' && name === 'websiteTypes') {
+      setFormData((prev) => ({
+        ...prev,
+        websiteTypes: checked
+          ? [...prev.websiteTypes, value]
+          : prev.websiteTypes.filter((item) => item !== value),
+      }));
+    } else if (type === 'checkbox' && name === 'specialRequirements') {
+      setFormData((prev) => ({
+        ...prev,
+        specialRequirements: checked
+          ? [...prev.specialRequirements, value]
+          : prev.specialRequirements.filter((item) => item !== value),
+      }));
+    } else if (type === 'checkbox' && name === 'pages') {
+      setFormData((prev) => ({
+        ...prev,
+        pages: checked
+          ? [...prev.pages, value]
+          : prev.pages.filter((item) => item !== value),
+      }));
+    } else if (type === 'checkbox' && name === 'responsive') {
+      setFormData((prev) => ({ ...prev, responsive: checked }));
+    } else if (type === 'checkbox' && name === 'wantDomain') {
+      setFormData((prev) => ({ ...prev, wantDomain: checked }));
+    } else if (type === 'checkbox' && name === 'technologies') {
+      setFormData((prev) => ({
+        ...prev,
+        technologies: checked
+          ? [...prev.technologies, value]
+          : prev.technologies.filter((item) => item !== value),
+      }));
+    } else if (type === 'file') {
+      setFormData((prev) => ({ ...prev, attachment: e.target.files[0] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    exit: { opacity: 0, y: -20 }
+  };
+
+  const navItems = [
+    { id: 'websiteType', label: 'Type', icon: '🖥️' },
+    { id: 'pages', label: 'Pages', icon: '📄' },
+    { id: 'features', label: 'Features', icon: '✨' },
+    { id: 'tech', label: 'Tech', icon: '💻' },
+    { id: 'extras', label: 'Extras', icon: '➕' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-4">
+            Build Your Dream Website
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Customize every detail and get an instant price estimate
+          </p>
+        </motion.div>
+
+        {/* Progress & Price Indicator */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
+          <div className="w-full md:w-auto bg-white rounded-full p-1 shadow-sm border border-gray-100">
+            <div className="flex justify-between w-full">
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSection(item.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                    activeSection === item.id
+                      ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md'
+                      : 'text-gray-500 hover:text-indigo-600'
+                  }`}
+                >
+                  <span>{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <motion.div 
+            whileHover={{ scale: 1.03 }}
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3"
+          >
+            <div className="text-lg font-semibold">Estimated Cost:</div>
+            <div className="text-2xl font-bold">${priceEstimate.toLocaleString()}</div>
+          </motion.div>
+        </div>
+
+        {/* Main Form Container */}
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+          {/* Form Sections */}
+          <div className="p-8 md:p-10">
+            <AnimatePresence mode="wait">
+              {/* Website Type Section */}
+              {activeSection === 'websiteType' && (
+                <motion.div
+                  key="websiteType"
+                  variants={sectionVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="space-y-8"
+                >
+                  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <span>🖥️</span> What type of website do you need?
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {checkboxOptions.map((option) => (
+                      <motion.label
+                        key={option.value}
+                        whileHover={{ y: -5 }}
+                        className={`flex flex-col items-center p-6 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
+                          formData.websiteTypes.includes(option.value)
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md'
+                            : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30'
+                        }`}
+                      >
+                        <span className="text-3xl mb-3">{option.icon}</span>
+                        <input
+                          type="checkbox"
+                          name="websiteTypes"
+                          value={option.value}
+                          checked={formData.websiteTypes.includes(option.value)}
+                          onChange={handleInputChange}
+                          className="hidden"
+                        />
+                        <span className="text-lg font-medium text-center">{option.name}</span>
+                      </motion.label>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Pages Section */}
+              {activeSection === 'pages' && (
+                <motion.div
+                  key="pages"
+                  variants={sectionVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="space-y-8"
+                >
+                  <div className="space-y-6">
+                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                      <span>📄</span> Page Configuration
+                    </h2>
+                    
+                    <div className="space-y-4">
+                      <label className="block text-lg font-medium text-gray-700">
+                        How many pages will your site have?
+                      </label>
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="range"
+                          name="numberOfPages"
+                          min="1"
+                          max="50"
+                          value={formData.numberOfPages}
+                          onChange={handleInputChange}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        />
+                        <span className="text-xl font-bold text-indigo-600 min-w-[3rem]">
+                          {formData.numberOfPages}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <label className="block text-lg font-medium text-gray-700">
+                        Select standard pages you need:
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        {pageSuggestions.map((page) => (
+                          <motion.label
+                            key={page.value}
+                            whileHover={{ scale: 1.05 }}
+                            className={`flex items-center p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
+                              formData.pages.includes(page.value)
+                                ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                : 'border-gray-200 hover:border-indigo-300'
+                            }`}
+                          >
+                            <span className="mr-2">{page.icon}</span>
+                            <input
+                              type="checkbox"
+                              name="pages"
+                              value={page.value}
+                              checked={formData.pages.includes(page.value)}
+                              onChange={handleInputChange}
+                              className="hidden"
+                            />
+                            <span>{page.name}</span>
+                          </motion.label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Features Section */}
+              {activeSection === 'features' && (
+                <motion.div
+                  key="features"
+                  variants={sectionVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="space-y-8"
+                >
+                  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <span>✨</span> Special Features
+                  </h2>
+                  
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {specialRequirementsOptions.map((req) => (
+                        <motion.label
+                          key={req.value}
+                          whileHover={{ scale: 1.02 }}
+                          className={`flex items-center p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+                            formData.specialRequirements.includes(req.value)
+                              ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm'
+                              : 'border-gray-200 hover:border-indigo-300'
+                          }`}
+                        >
+                          <span className="text-2xl mr-3">{req.icon}</span>
+                          <div>
+                            <div className="font-medium">{req.name}</div>
+                            <div className="text-sm text-gray-500">+$200</div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            name="specialRequirements"
+                            value={req.value}
+                            checked={formData.specialRequirements.includes(req.value)}
+                            onChange={handleInputChange}
+                            className="ml-auto h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                          />
+                        </motion.label>
+                      ))}
+                    </div>
+                    
+                    <div className="pt-4">
+                      <label className="flex items-center justify-between p-4 rounded-xl border border-gray-200 hover:border-indigo-300 transition-colors duration-200 cursor-pointer">
+                        <div className="flex items-center">
+                          <span className="text-2xl mr-3">📱</span>
+                          <div>
+                            <div className="font-medium">Responsive Design</div>
+                            <div className="text-sm text-gray-500">Works on all devices (+$500)</div>
+                          </div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          name="responsive"
+                          checked={formData.responsive}
+                          onChange={handleInputChange}
+                          className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                        />
+                      </label>
+                    </div>
+                    
+                    <div className="pt-4">
+                      <label className="flex items-center justify-between p-4 rounded-xl border border-gray-200 hover:border-indigo-300 transition-colors duration-200 cursor-pointer">
+                        <div className="flex items-center">
+                          <span className="text-2xl mr-3">🌐</span>
+                          <div>
+                            <div className="font-medium">Custom Domain</div>
+                            <div className="text-sm text-gray-500">Your own web address (+$150/year)</div>
+                          </div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          name="wantDomain"
+                          checked={formData.wantDomain}
+                          onChange={handleInputChange}
+                          className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Tech Stack Section */}
+              {activeSection === 'tech' && (
+                <motion.div
+                  key="tech"
+                  variants={sectionVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="space-y-8"
+                >
+                  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <span>💻</span> Technology Stack
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {technologyOptions.map((tech) => (
+                      <motion.label
+                        key={tech.value}
+                        whileHover={{ y: -3 }}
+                        className={`flex flex-col items-center p-5 rounded-xl border-2 transition-all duration-200 cursor-pointer ${
+                          formData.technologies.includes(tech.value)
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm'
+                            : 'border-gray-200 hover:border-indigo-300'
+                        }`}
+                      >
+                        <span className="text-3xl mb-2">{tech.icon}</span>
+                        <div className="font-medium text-center">{tech.name}</div>
+                        {['Shopify', 'WordPress'].includes(tech.value) && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            {tech.value === 'Shopify' ? '+$1000' : '+$800'}
+                          </div>
+                        )}
+                        <input
+                          type="checkbox"
+                          name="technologies"
+                          value={tech.value}
+                          checked={formData.technologies.includes(tech.value)}
+                          onChange={handleInputChange}
+                          className="mt-2 h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                        />
+                      </motion.label>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Extras Section */}
+              {activeSection === 'extras' && (
+                <motion.div
+                  key="extras"
+                  variants={sectionVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="space-y-8"
+                >
+                  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <span>➕</span> Additional Details
+                  </h2>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-lg font-medium text-gray-700 mb-2">
+                        Special Instructions
+                      </label>
+                      <textarea
+                        name="extraRequirements"
+                        value={formData.extraRequirements}
+                        onChange={handleInputChange}
+                        className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50/50 text-gray-800 placeholder-gray-400 h-32 transition-all duration-300 resize-none"
+                        placeholder="Any specific requirements or preferences?"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-lg font-medium text-gray-700 mb-2">
+                        Upload Design Files (Optional)
+                      </label>
+                      <div className="flex items-center justify-center w-full">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p className="mb-2 text-sm text-gray-500">
+                              <span className="font-semibold">Click to upload</span> or drag and drop
+                            </p>
+                            <p className="text-xs text-gray-500">PNG, JPG, PDF (MAX. 10MB)</p>
+                          </div>
+                          <input 
+                            type="file" 
+                            name="attachment" 
+                            onChange={handleInputChange} 
+                            className="hidden" 
+                          />
+                        </label>
+                      </div>
+                      {formData.attachment && (
+                        <div className="mt-3 flex items-center gap-2 bg-indigo-50/50 p-3 rounded-lg inline-block">
+                          <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          <span className="text-sm text-gray-700">{formData.attachment.name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Navigation Footer */}
+          <div className="bg-gray-50 px-8 py-6 border-t border-gray-200 flex justify-between">
+            {activeSection !== 'websiteType' ? (
+              <button
+                onClick={() => {
+                  const currentIndex = navItems.findIndex(item => item.id === activeSection);
+                  setActiveSection(navItems[currentIndex - 1].id);
+                }}
+                className="px-6 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back
+              </button>
+            ) : (
+              <div></div>
+            )}
+            
+            {activeSection !== 'extras' ? (
+              <button
+                onClick={() => {
+                  const currentIndex = navItems.findIndex(item => item.id === activeSection);
+                  setActiveSection(navItems[currentIndex + 1].id);
+                }}
+                className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg text-white font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+              >
+                Next
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            ) : (
+              <button
+                className="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-500 rounded-lg text-white font-bold hover:from-green-600 hover:to-teal-600 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+              >
+                Submit Project
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14M12 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Requirement;
